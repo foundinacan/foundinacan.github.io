@@ -5,7 +5,7 @@
   var proxyOrigin = "https://neal-fun-proxy.onrender.com";
   function shouldProxy(url) {
     if (url.origin !== window.location.origin) return false;
-    if (url.pathname === "/" || /(?:^|\/)index\.html$/i.test(url.pathname)) return false;
+    if (url.pathname === "/" || url.pathname === "/index.html") return false;
     if (/sandboxels/i.test(url.pathname)) return false;
     if (/^\/(?:_nuxt|general|favicons|fonts|images)(?:\/|$)/i.test(url.pathname)) return false;
     return true;
