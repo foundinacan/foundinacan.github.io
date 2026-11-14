@@ -4,13 +4,13 @@
 (function () {
   var proxyOrigin = "https://neal-fun-proxy.onrender.com";
   function isNealHost(url) {
-    return /(^|\\.)neal\\.fun$/i.test(url.hostname);
+    return /(^|\.)neal\.fun$/i.test(url.hostname);
   }
   function shouldProxy(url) {
     if (!isNealHost(url) && url.origin !== window.location.origin) return false;
     if (url.pathname === "/" || url.pathname === "/index.html") return false;
     if (/sandboxels/i.test(url.pathname)) return false;
-    if (/^\\/(?:_nuxt|general|favicons|fonts|images)(?:\\/|$)/i.test(url.pathname)) return false;
+    if (/^\/(?:_nuxt|general|favicons|fonts|images)(?:\/|$)/i.test(url.pathname)) return false;
     return true;
   }
   function proxyLink(link) {
