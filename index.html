@@ -3,49 +3,40 @@
   <script>
 (function () {
   var proxyOrigin = "https://neal-fun-proxy.fly.dev";
-  function isNealHost(url) {
-    return /(^|\\.)neal\\.fun$/i.test(url.hostname);
-  }
+  var excluded = ["/_nuxt/", "/general/", "/favicons/", "/fonts/", "/images/"];
   function shouldProxy(url) {
-    if (/sandboxels/i.test(url.pathname)) return false;
-    if (url.pathname === "/" || url.pathname === "/index.html") return false;
-    if (isNealHost(url)) {
-      if (/^\\/(?:_nuxt|general|favicons|fonts|images)(?:\\/|$)/i.test(url.pathname)) return false;
-      return true;
-    }
-    if (url.origin === window.location.origin) {
-      return !/^\\/(?:_nuxt|general|favicons|fonts|images)(?:\\/|$)/i.test(url.pathname);
-    }
-    return false;
+    var path = url.pathname.toLowerCase();
+    if (path.indexOf("sandboxels") !== -1) return false;
+    if (path === "/" || path === "/index.html") return false;
+    if (excluded.some(function (prefix) { return path.indexOf(prefix) === 0; })) return false;
+    return url.origin === window.location.origin || url.hostname === "neal.fun" || url.hostname.endsWith(".neal.fun");
   }
-  function proxyLink(link) {
-    if (!link || !link.href) return;
+  function target(url) {
+    return proxyOrigin + url.pathname + url.search + url.hash;
+  }
+  function rewrite(link) {
     try {
-      var url = new URL(link.href, window.location.href);
-      if (!shouldProxy(url)) return;
-      link.href = proxyOrigin + url.pathname + url.search + url.hash;
+      var url = new URL(link.getAttribute("href"), window.location.href);
+      if (shouldProxy(url)) link.setAttribute("href", target(url));
     } catch (_) {}
+  }
+  function scan() {
+    document.querySelectorAll("a[href]").forEach(rewrite);
   }
   document.addEventListener("click", function (event) {
     var link = event.target && event.target.closest ? event.target.closest("a[href]") : null;
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     try {
-      var url = new URL(link.href, window.location.href);
+      var url = new URL(link.getAttribute("href"), window.location.href);
       if (!shouldProxy(url)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      window.location.assign(proxyOrigin + url.pathname + url.search + url.hash);
+      window.location.href = target(url);
     } catch (_) {}
   }, true);
-  function updateLinks() {
-    document.querySelectorAll("a[href]").forEach(proxyLink);
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", updateLinks);
-  } else {
-    updateLinks();
-  }
-  new MutationObserver(updateLinks).observe(document.documentElement, { childList: true, subtree: true });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", scan);
+  else scan();
+  new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script></head>
   <body>
