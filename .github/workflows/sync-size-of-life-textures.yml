@@ -22,7 +22,7 @@ jobs:
       - name: Copy local KTX2 textures
         run: |
           mkdir -p site/size-of-life/animals/original/basis
-          find source/size-of-life/animals/original/basis -type f -name '*.ktx2' -exec cp -n {} site/size-of-life/animals/original/basis/ +
+          find source/size-of-life/animals/original/basis -type f -name '*.ktx2' -print0 | xargs -0 -I FILE cp -n FILE site/size-of-life/animals/original/basis/
           cd site
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
